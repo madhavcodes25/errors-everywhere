@@ -1,6 +1,6 @@
 // Culprit ranking — "find the guilty commit without re-running anything."
 //
-// git bisect rebuilds and retests repeatedly; TraceBack ranks suspect
+// git bisect rebuilds and retests repeatedly; Errors Everywhere ranks suspect
 // commits instantly from the history already stored in MongoDB.
 //
 // ALGORITHM (per the contract):

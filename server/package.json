@@ -1,8 +1,8 @@
 {
-  "name": "traceback-server",
+  "name": "errors-everywhere-server",
   "version": "1.0.0",
   "private": true,
-  "description": "TraceBack API server: event ingest, analysis engine, SSE stream.",
+  "description": "Errors Everywhere API server: event ingest, analysis engine, SSE stream.",
   "main": "src/index.js",
   "scripts": {
     "start": "node src/index.js",

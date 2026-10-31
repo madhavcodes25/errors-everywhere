@@ -1,4 +1,4 @@
-// Configuration for the TraceBack server.
+// Configuration for the Errors Everywhere server.
 // Values come from environment variables; server/.env is loaded first as a
 // convenience (hand-rolled so we avoid an extra dependency).
 
@@ -24,7 +24,7 @@ const config = {
   // MongoDB connection string. Empty string = use the in-memory dev database.
   mongoUri: (process.env.MONGODB_URI || "").trim(),
   // Database name inside MongoDB.
-  dbName: process.env.DATABASE_NAME || "traceback",
+  dbName: process.env.DATABASE_NAME || "errors-everywhere",
   // LLM summary (Part 7). The app works FULLY with this off: rules and
   // MongoDB do the detective work, the LLM only rephrases verified evidence.
   llm: {

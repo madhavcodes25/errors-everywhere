@@ -150,7 +150,7 @@ function scoreRelease(run, ctx) {
     ? `Do not release yet. Top issue: ${topIssue}. Fix it, land a green run, then re-check.`
     : score >= LEVELS.MEDIUM
       ? `Risky release (score ${score}/100). Review the reason(s) above before shipping.`
-      : `No build-health risks found (score ${score}/100). Safe to release from TraceBack's point of view.`;
+      : `No build-health risks found (score ${score}/100). Safe to release from Errors Everywhere's point of view.`;
 
   return { score, level, blocked, reasons, recommendation };
 }

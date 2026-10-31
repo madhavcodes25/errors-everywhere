@@ -3,7 +3,7 @@
 // The SAME bug produces slightly different error text on every run (numbers,
 // paths, timings differ). The signature normalizes the message and hashes it,
 // so "seen this failure before?" becomes a simple string comparison across
-// runs. Algorithm (part of the TraceBack contract):
+// runs. Algorithm (part of the Errors Everywhere contract):
 //   lowercase · quoted strings -> S · hex strings and UUIDs -> H ·
 //   file paths -> PATH · numbers -> N · collapse whitespace · sha1
 //

@@ -31,7 +31,7 @@ function check(name, ok, detail) {
 
 // Deterministic fake commit sha for simulated scenario runs.
 function fakeSha(key) {
-  return crypto.createHash("sha1").update("traceback-analysis:" + key).digest("hex");
+  return crypto.createHash("sha1").update("errors-everywhere-analysis:" + key).digest("hex");
 }
 
 // Build a contract-valid event like the collector would send it.
