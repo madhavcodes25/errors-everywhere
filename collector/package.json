@@ -2,7 +2,7 @@
   "name": "traceback-collector",
   "version": "1.0.0",
   "private": true,
-  "description": "TraceBack collector CLI: runs tests, reads git/env/deps, sends an event to the TraceBack server.",
+  "description": "Errors Everywhere collector CLI: runs tests, reads git/env/deps, sends an event to the TraceBack server.",
   "bin": {
     "traceback": "bin/traceback.js"
   },

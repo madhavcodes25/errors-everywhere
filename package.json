@@ -2,7 +2,7 @@
   "name": "traceback",
   "version": "1.0.0",
   "private": true,
-  "description": "TraceBack — a flight recorder for builds. Root helper scripts for the hackathon demo.",
+  "description": "Errors Everywhere — a flight recorder for builds. Root helper scripts for the demo.",
   "scripts": {
     "demo:seed": "node scripts/seed-via-api.js",
     "demo:reset": "node scripts/demo/reset.js",

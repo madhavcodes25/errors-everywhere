@@ -2,7 +2,7 @@
 // Consistent words: always "run", "commit", "test".
 
 export const app = {
-  name: "Error Everywhere",
+  name: "Errors Everywhere",
   tagline: "Every run, recorded",
 };
 

@@ -1,8 +1,6 @@
-# TraceBack — a flight recorder for builds
+# Errors Everywhere — a flight recorder for builds
 
-Track 3: Developer Tools for Production
-
-Every CI run dies with the same four questions. TraceBack answers them
+Every CI run dies with the same four questions. Errors Everywhere answers them
 instantly, from history already stored in MongoDB — with evidence and an
 honest confidence label.
 
@@ -47,7 +45,7 @@ verified evidence — and every number it writes is checked against the facts.
 
 Plus the API contract: `POST /events` (idempotent), `GET /projects/:id/runs`,
 `GET /stream` (SSE), `POST /runs/:id/summary` (optional LLM), `GET /health`,
-and `GET /rejected-events` (Part 8 addition — what the server refused, re-redacted).
+and `GET /rejected-events` (what the server refused, re-redacted).
 
 ## Setup (under 10 steps)
 
@@ -70,9 +68,6 @@ and `GET /rejected-events` (Part 8 addition — what the server refused, re-reda
 10. Follow `scripts/demo.md` for the 5-minute demo (`npm run demo:…`).
 11. `cd .. && npm run demo:seed` — replays 30 days of realistic history into
     the running server (also works against Atlas).
-9. Optional, sample project: `cd sample-project && npm install` (Jest + deps
-   for the demo scenarios and the collector).
-10. Follow `scripts/demo.md` for the 5-minute demo (`npm run demo:…`).
 
 ## The data contract (short version)
 
@@ -130,9 +125,8 @@ and `GET /rejected-events` (Part 8 addition — what the server refused, re-reda
 ## Future work
 
 - A **GitHub Action**: run the collector on every push and PR.
-- A **CLI release gate**: `traceback release-gate --project shop-api` exits
-  non-zero when the release check says HIGH/BLOCKED — wire it between CI and
-  deploy.
+- A **CLI release gate**: `release-gate --project shop-api` exits non-zero
+  when the release check says HIGH/BLOCKED — wire it between CI and deploy.
 - Branch-aware baselines everywhere, and culprit ranking that learns lift
   per test×file pair over longer windows.
 - Slack/Teams notifications on new HIGH release risks.
@@ -141,7 +135,7 @@ and `GET /rejected-events` (Part 8 addition — what the server refused, re-reda
 
 ```
 sample-project/   shop-api + Jest tests + git repo + break-on-purpose scenarios
-collector/        traceback CLI: run / resend (zero dependencies)
+collector/        CLI: run / resend (zero dependencies)
 server/           Express + mongodb driver: ingest, analysis, SSE, summary
 dashboard/        React + Vite: timeline, run detail, culprits, release check
 scripts/          seeder, demo scenarios, demo.md, one-command demo scripts

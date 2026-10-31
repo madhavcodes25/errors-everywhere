@@ -10,7 +10,7 @@ async function main() {
   const app = buildApp(collections, db);
 
   const server = app.listen(config.port, () => {
-    console.log(`[server] TraceBack API listening on http://localhost:${config.port}`);
+    console.log(`[server] Errors Everywhere API listening on http://localhost:${config.port}`);
     console.log(
       `[server] database: ${isMemory ? "in-memory replica set (dev only, wiped on restart)" : safeUri(config.mongoUri)}`
     );
