@@ -68,8 +68,8 @@ and `GET /rejected-events` (Part 8 addition — what the server refused, re-reda
 9. Optional, sample project: `cd sample-project && npm install` (Jest + deps
    for the demo scenarios and the collector).
 10. Follow `scripts/demo.md` for the 5-minute demo (`npm run demo:…`).
-8. `cd .. && npm run demo:seed` — replays 30 days of realistic history into
-   the running server (also works against Atlas).
+11. `cd .. && npm run demo:seed` — replays 30 days of realistic history into
+    the running server (also works against Atlas).
 9. Optional, sample project: `cd sample-project && npm install` (Jest + deps
    for the demo scenarios and the collector).
 10. Follow `scripts/demo.md` for the 5-minute demo (`npm run demo:…`).
