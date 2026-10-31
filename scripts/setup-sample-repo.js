@@ -26,6 +26,18 @@ function run() {
   const gitDir = path.join(SAMPLE, ".git");
   const hasRepo = fs.existsSync(gitDir);
   const hasTag = hasRepo && git(["rev-parse", "--verify", "healthy"]).length > 0;
+  const envFile = path.join(SAMPLE, ".env");
+  if (!fs.existsSync(envFile)) {
+    fs.writeFileSync(
+      envFile,
+      "# Demo values for Errors Everywhere scenarios (this file is gitignored on purpose).\n" +
+        "# Errors Everywhere stores only the NAMES of env vars, never these values.\n" +
+        "DATABASE_URL=mongodb://demo-user:s3cretPass@cluster0.example.mongodb.net/shop\n" +
+        "STRIPE_KEY=sk_test_51H7demoKq2xPlaceholder9fX\n"
+    );
+    console.log("[setup:sample] created sample-project/.env");
+  }
+
   if (hasRepo && hasTag) {
     console.log(`[setup:sample] demo repo already exists (tag "healthy" at ${git(["rev-parse", "--short", "healthy"])}). Nothing to do.`);
     return;

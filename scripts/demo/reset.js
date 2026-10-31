@@ -15,7 +15,8 @@ const { resetSampleProject } = require("../scenarios/lib");
 const ROOT = path.join(__dirname, "..", "..");
 module.paths.push(path.join(ROOT, "server", "node_modules")); // reuse server deps
 
-const resettable = Boolean(process.env.MONGODB_URI);
+const config = require(path.join(ROOT, "server", "src", "config"));
+const resettable = Boolean(config.mongoUri);
 
 console.log("[demo:reset] 1/2 restoring the sample project...");
 resetSampleProject();
@@ -25,8 +26,7 @@ if (resettable) {
   (async () => {
     console.log("[demo:reset] 2/2 wiping the database and reseeding...");
     const { MongoClient } = require("mongodb");
-    const config = require("../server/src/config");
-    const { setupDatabase } = require("../server/src/dbSetup");
+    const { setupDatabase } = require(path.join(ROOT, "server", "src", "dbSetup"));
     const client = new MongoClient(config.mongoUri);
     await client.connect();
     const db = client.db(config.dbName);

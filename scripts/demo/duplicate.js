@@ -17,9 +17,11 @@ async function main() {
     if (res.status === 200 && res.body.status === "duplicate_ignored") {
       console.log("Duplicate ignored — the run count did not change (idempotency works).");
       process.exitCode = 0; // exitCode (not exit): lets stdout flush before the process ends
+      return;
     }
     console.log(`Unexpected response: HTTP ${res.status} ${JSON.stringify(res.body)}`);
     process.exitCode = 1; // exitCode (not exit): lets stdout flush before the process ends
+    return;
   }
 
   // No collector run yet: send one fresh event twice — the second is the dup.

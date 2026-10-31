@@ -25,6 +25,7 @@ async function main() {
     console.log(`Server answered 400 with a clear reason: "${res.body.error}"`);
     console.log("The body was stored in rejected_events — see the dashboard's 'Rejected events' page.");
     process.exitCode = 0; // exitCode (not exit): lets stdout flush before the process ends
+    return;
   }
   console.log(`Unexpected response: HTTP ${res.status} ${JSON.stringify(res.body)}`);
   process.exitCode = 1; // exitCode (not exit): lets stdout flush before the process ends
