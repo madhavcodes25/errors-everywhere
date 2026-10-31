@@ -173,7 +173,7 @@ export function mockRelease(projectId, runId) {
     return {
       projectId, runId, branch: "main", asOf: new Date().toISOString(),
       score: 0, level: "LOW", blocked: false, reasons: [],
-      recommendation: "No build-health risks found (score 0/100). Safe to release from TraceBack's point of view.",
+      recommendation: "No build-health risks found (score 0/100). Safe to release from Errors Everywhere's point of view.",
       confidence: "high",
     };
   }

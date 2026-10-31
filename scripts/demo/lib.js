@@ -1,5 +1,5 @@
 // Shared helpers for the one-command demo scripts (npm run demo:*).
-// Every script talks to the RUNNING TraceBack server through its API —
+// Every script talks to the RUNNING Errors Everywhere server through its API —
 // exactly what a judge can watch in the dashboard.
 
 const { spawnSync } = require("child_process");
@@ -7,7 +7,7 @@ const path = require("path");
 
 const ROOT = path.join(__dirname, "..", "..");
 const SAMPLE = path.join(ROOT, "sample-project");
-const COLLECTOR = path.join(ROOT, "collector", "bin", "traceback.js");
+const COLLECTOR = path.join(ROOT, "collector", "bin", "errors-everywhere.js");
 
 function serverUrl() {
   const i = process.argv.indexOf("--server");

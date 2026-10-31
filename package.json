@@ -1,5 +1,5 @@
 {
-  "name": "traceback",
+  "name": "errors-everywhere",
   "version": "1.0.0",
   "private": true,
   "description": "Errors Everywhere — a flight recorder for builds. Root helper scripts for the demo.",

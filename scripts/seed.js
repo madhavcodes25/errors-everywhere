@@ -56,7 +56,7 @@ const rand = mulberry32(PRNG_SEED);
 
 // Stable fake commit SHAs: derived from a fixed key, 40 hex chars like real ones.
 function fakeSha(key) {
-  return crypto.createHash("sha1").update("traceback-seed:" + key).digest("hex");
+  return crypto.createHash("sha1").update("errors-everywhere-seed:" + key).digest("hex");
 }
 
 // ---------------------------------------------------------------------------
@@ -91,7 +91,7 @@ const REFUND_SPEC = { key: "refund", name: "refund works", file: "tests/payment.
 
 // Error messages per failure kind. "pay-charge" and "refund" are written to
 // EXACTLY match what the live sample project throws, so seeded history and
-// live demo runs share error signatures — TraceBack then says "seen before".
+// live demo runs share error signatures — Errors Everywhere then says "seen before".
 const ERROR_MESSAGES = {
   "pay-charge": "payment charges card: expected charge 102.9 but got 100",
   "discount-round": "discount rounding mismatch: got 33.71 but expected 33.72",

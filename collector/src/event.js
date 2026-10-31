@@ -1,4 +1,4 @@
-// Build the event payload following the TraceBack data contract, and the
+// Build the event payload following the Errors Everywhere data contract, and the
 // idempotent eventId: sha1(projectId:commitSha:ciRunId:attempt).
 // KEEP IN SYNC with server/src/ingest.js (computeEventId) — the server
 // recomputes it and rejects mismatches.
@@ -36,7 +36,7 @@ function buildEvent({ projectId, startedAt, finishedAt, status, jestInfo, gitInf
     envKeys: env.envKeys, // names only, never values
     missingEnvKeys: env.missingEnvKeys,
     tests: jestInfo ? jestInfo.tests : [],
-    source: { ci: "traceback-collector", host: os.hostname(), node: process.version },
+    source: { ci: "errors-everywhere-collector", host: os.hostname(), node: process.version },
   };
   if (status === "errored") {
     payload.collectorError = problems.join(" | ") || "collector failed for an unknown reason";

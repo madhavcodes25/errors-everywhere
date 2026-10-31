@@ -3,7 +3,7 @@
 //   1. README edit            (innocent)
 //   2. cart.js comment tweak  (innocent)
 //   3. payment.js fee removal (THE CULPRIT)
-// Then the tests run once and "payment charges card" fails. TraceBack should
+// Then the tests run once and "payment charges card" fails. Errors Everywhere should
 // blame commit 3, not the bundle as a whole.
 
 const fs = require("fs");
@@ -50,7 +50,7 @@ function apply() {
 function run() {
   apply();
   // ONE test run covers the whole bundle — this is the situation where
-  // "which commit broke it?" is genuinely hard without a tool like TraceBack.
+  // "which commit broke it?" is genuinely hard without a tool like Errors Everywhere.
   const result = runJest();
   const ok = result.code !== 0 && result.failed === 1 && result.output.includes("payment charges card");
   report(NAME, 'exactly 1 failing test: "payment charges card"', ok,

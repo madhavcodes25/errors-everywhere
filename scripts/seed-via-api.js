@@ -1,4 +1,4 @@
-// Replay the seeded 30-day history through a RUNNING TraceBack server.
+// Replay the seeded 30-day history through a RUNNING Errors Everywhere server.
 //
 // The dashboard needs seeded data inside the server the browser talks to —
 // and the only contract-clean way into that database is POST /events.

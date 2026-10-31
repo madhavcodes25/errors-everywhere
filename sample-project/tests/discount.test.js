@@ -12,7 +12,7 @@ test("rejects discount percentages outside 0-100", () => {
 
 test("applies tier discounts for larger carts", () => {
   // Loop + custom error (instead of many expect().toBe calls) so the failure
-  // message — and therefore the TraceBack error signature — is stable.
+  // message — and therefore the Errors Everywhere error signature — is stable.
   for (const [total, expected] of [[50, 5], [200, 10], [500, 15], [30, 0]]) {
     const actual = tierDiscountPercent(total);
     if (actual !== expected) {

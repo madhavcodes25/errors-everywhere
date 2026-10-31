@@ -6,13 +6,13 @@ const fs = require("fs");
 const path = require("path");
 const { SAMPLE, post, serverUrl, step } = require("./lib");
 
-const lastEventPath = path.join(SAMPLE, ".traceback", "last-event.json");
+const lastEventPath = path.join(SAMPLE, ".errors-everywhere", "last-event.json");
 
 async function main() {
   let event;
   if (fs.existsSync(lastEventPath)) {
     event = JSON.parse(fs.readFileSync(lastEventPath, "utf8"));
-    step("Re-sending the exact last event from sample-project/.traceback/last-event.json...");
+    step("Re-sending the exact last event from sample-project/.errors-everywhere/last-event.json...");
     const res = await post("/events", event);
     if (res.status === 200 && res.body.status === "duplicate_ignored") {
       console.log("Duplicate ignored — the run count did not change (idempotency works).");

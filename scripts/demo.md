@@ -1,4 +1,4 @@
-# TraceBack — 5-minute demo script
+# Errors Everywhere — 5-minute demo script
 
 Everything runs from the repo root. One-time setup (see README):
 
@@ -21,7 +21,7 @@ wipes + reseeds automatically; with the in-memory fallback it prints the
 > "Every CI run dies with the same three questions: **why did it fail**, **what
 > changed since it last worked**, and **is it safe to release** — and for
 > commits: **which one broke it?** Answering means digging through logs and
-> replaying pipelines. TraceBack is a flight recorder: every run lands in
+> replaying pipelines. Errors Everywhere is a flight recorder: every run lands in
 > MongoDB once, and those four answers come back instantly, with evidence."
 
 Point at the timeline: 40 seeded runs over 30 days — the tool's memory.

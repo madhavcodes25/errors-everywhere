@@ -1,6 +1,6 @@
 // Scenario B — logic bug: drop the payment processing fee so the
 // "payment charges card" test fails. The error message matches the one in
-// the seeded history, so TraceBack recognizes it as a RECURRING failure.
+// the seeded history, so Errors Everywhere recognizes it as a RECURRING failure.
 
 const {
   ensureCleanState, replaceInFile, commitAll, runJest, report, shouldRestore, resetSampleProject,

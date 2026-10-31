@@ -53,11 +53,11 @@ async function runCollector({ projectId, serverUrl, cwd }) {
   const ciRunId = nextCiRunId(state);
   const event = buildEvent({ projectId, startedAt, finishedAt: new Date(), status, jestInfo, gitInfo, deps, env, problems, ciRunId });
 
-  // 5) Remember the exact event so `traceback resend` can repeat it verbatim.
+  // 5) Remember the exact event so `errors-everywhere resend` can repeat it verbatim.
   saveLastEvent(cwd, event);
 
   // 6) Send it (timeout + 3 retries with backoff).
-  console.log(`[traceback] sending event ${event.eventId.slice(0, 12)}… to ${serverUrl}/events`);
+  console.log(`[errors-everywhere] sending event ${event.eventId.slice(0, 12)}… to ${serverUrl}/events`);
   const result = await postEvent(serverUrl, event);
 
   if (result.ok) {
@@ -74,17 +74,17 @@ async function runCollector({ projectId, serverUrl, cwd }) {
   return result.ok ? 0 : 1;
 }
 
-// `traceback resend` — send the EXACT same event again (duplicate demo).
+// `errors-everywhere resend` — send the EXACT same event again (duplicate demo).
 async function resendLastEvent({ serverUrl, cwd }) {
   let event;
   try {
     event = loadLastEvent(cwd);
   } catch {
-    console.error(`[traceback] no ${cwd}/.traceback/last-event.json found — run "traceback run" first.`);
+    console.error(`[errors-everywhere] no ${cwd}/.errors-everywhere/last-event.json found — run "errors-everywhere run" first.`);
     return 1;
   }
 
-  console.log(`[traceback] re-sending event ${event.eventId.slice(0, 12)}… to ${serverUrl}/events`);
+  console.log(`[errors-everywhere] re-sending event ${event.eventId.slice(0, 12)}… to ${serverUrl}/events`);
   const result = await postEvent(serverUrl, event);
 
   const duplicate = result.ok && result.body && (result.body.status === "duplicate_ignored" || result.body.duplicate);
@@ -101,17 +101,17 @@ async function resendLastEvent({ serverUrl, cwd }) {
 function printSummary({ result, event, status, jestInfo, gitInfo, env, problems }) {
   // Context lines first.
   if (jestInfo) {
-    console.log(`[traceback] jest: ${jestInfo.passed} passed, ${jestInfo.failed} failed, ${jestInfo.tests.length} total`);
+    console.log(`[errors-everywhere] jest: ${jestInfo.passed} passed, ${jestInfo.failed} failed, ${jestInfo.tests.length} total`);
   } else {
-    console.log("[traceback] jest: no results (see collectorError below)");
+    console.log("[errors-everywhere] jest: no results (see collectorError below)");
   }
   if (gitInfo) {
-    console.log(`[traceback] git: ${gitInfo.commits.length} commit(s) since last run (${gitInfo.range})`);
+    console.log(`[errors-everywhere] git: ${gitInfo.commits.length} commit(s) since last run (${gitInfo.range})`);
   } else {
-    console.log("[traceback] git: unavailable");
+    console.log("[errors-everywhere] git: unavailable");
   }
   console.log(
-    `[traceback] env: ${env.envKeys.length}/${env.requiredEnvKeys.length} required keys present` +
+    `[errors-everywhere] env: ${env.envKeys.length}/${env.requiredEnvKeys.length} required keys present` +
       (env.missingEnvKeys.length ? ` (missing: ${env.missingEnvKeys.join(", ")})` : "")
   );
 
@@ -135,11 +135,11 @@ function printSummary({ result, event, status, jestInfo, gitInfo, env, problems 
 
 function printSendFailure(result) {
   if (result.permanent) {
-    console.error(`[traceback] server REJECTED the event (HTTP ${result.status}): ${JSON.stringify(result.body)}`);
-    console.error("[traceback] this is a bug in the collector's payload — please report it.");
+    console.error(`[errors-everywhere] server REJECTED the event (HTTP ${result.status}): ${JSON.stringify(result.body)}`);
+    console.error("[errors-everywhere] this is a bug in the collector's payload — please report it.");
   } else {
-    console.error(`[traceback] could not reach the server after 3 retries: ${result.error}`);
-    console.error("[traceback] the event was saved to .traceback/last-event.json — use \"traceback resend\" once the server is up.");
+    console.error(`[errors-everywhere] could not reach the server after 3 retries: ${result.error}`);
+    console.error("[errors-everywhere] the event was saved to .errors-everywhere/last-event.json — use \"errors-everywhere resend\" once the server is up.");
   }
 }
 

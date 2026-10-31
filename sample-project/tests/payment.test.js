@@ -3,7 +3,7 @@ const { chargeCard, refund, getStripeKey } = require("../src/payment");
 test("payment charges card", () => {
   const result = chargeCard({ number: "4242424242424242" }, 100);
   // Custom error instead of expect().toBe on purpose: the message (and thus
-  // the TraceBack error signature) stays identical no matter which machine or
+  // the Errors Everywhere error signature) stays identical no matter which machine or
   // number rounding produced the failure: "expected charge 102.9 but got 100".
   if (!result || result.charged !== 102.9) {
     throw new Error(`payment charges card: expected charge 102.9 but got ${result ? result.charged : "nothing"}`);

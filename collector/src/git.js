@@ -1,6 +1,6 @@
 // Read everything the collector needs from git:
 //   commitSha, branch, author + the commits[] array since the last recorded
-//   run (previous sha comes from .traceback/state.json; first run falls back
+//   run (previous sha comes from .errors-everywhere/state.json; first run falls back
 //   to the last 5 commits), and changedFiles as the union of all commit files.
 
 const { spawnSync } = require("child_process");
@@ -44,7 +44,7 @@ function readGitInfo(cwd, previousSha) {
       git(["cat-file", "-e", `${previousSha}^{commit}`], cwd); // does it exist?
       rangeArgs = [`${previousSha}..HEAD`];
     } catch {
-      console.warn(`[traceback] previous sha ${previousSha.slice(0, 7)} not in this repo — falling back to last 5 commits`);
+      console.warn(`[errors-everywhere] previous sha ${previousSha.slice(0, 7)} not in this repo — falling back to last 5 commits`);
     }
   }
   const output = git(["log", ...rangeArgs, "--name-only", "--pretty=format:--C--%H|%an|%s"], cwd);

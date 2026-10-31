@@ -1,7 +1,7 @@
 // Scenario E — bad configuration: run the tests WITHOUT STRIPE_KEY in the
 // environment (simulates a CI job with a missing secret). No file changes,
 // no commit — the failure is purely environmental, which is exactly the kind
-// of failure TraceBack should recognize as "missing-env" rather than blame a
+// of failure Errors Everywhere should recognize as "missing-env" rather than blame a
 // commit.
 
 const fs = require("fs");

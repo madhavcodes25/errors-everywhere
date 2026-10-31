@@ -1,4 +1,4 @@
-// POST the event to the TraceBack server, with a timeout and 3 retries
+// POST the event to the Errors Everywhere server, with a timeout and 3 retries
 // using exponential backoff. 4xx responses are NOT retried (the server
 // refused the event — retrying the same bytes cannot help).
 
@@ -26,7 +26,7 @@ async function postEvent(serverUrl, event, { timeoutMs = 10000, retries = 3 } = 
     }
     if (attempt < retries) {
       const backoff = 500 * Math.pow(3, attempt - 1); // 0.5s, 1.5s, 4.5s
-      console.log(`[traceback] send failed (${lastError.message}) — retry ${attempt}/${retries - 1} in ${backoff}ms`);
+      console.log(`[errors-everywhere] send failed (${lastError.message}) — retry ${attempt}/${retries - 1} in ${backoff}ms`);
       await sleep(backoff);
     }
   }

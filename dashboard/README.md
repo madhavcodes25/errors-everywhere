@@ -1,6 +1,6 @@
-# Error Everywhere — dashboard
+# Errors Everywhere — dashboard
 
-The developer-facing UI for TraceBack: every test run, recorded and explained.
+The developer-facing UI for Errors Everywhere: every test run, recorded and explained.
 Typography-led, dark by default, readable on a projector.
 
 ## Run it
@@ -11,7 +11,7 @@ npm install
 npm run dev        # http://localhost:5173
 ```
 
-The dashboard talks to the TraceBack server (default `http://localhost:4000`).
+The dashboard talks to the Errors Everywhere server (default `http://localhost:4000`).
 Start it first: `cd server && npm start`.
 
 ## Configure (one file)

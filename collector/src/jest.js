@@ -52,7 +52,7 @@ function mapStatus(status) {
 // Run jest and parse results. Throws Error (with .detail) when jest produced
 // no JSON results at all — that becomes a status "errored" run upstream.
 function runJest(cwd) {
-  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "traceback-jest-"));
+  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "errors-everywhere-jest-"));
   const outputFile = path.join(tmpDir, "jest-results.json");
   const jest = resolveJestCommand(cwd);
 

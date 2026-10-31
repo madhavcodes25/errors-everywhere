@@ -1,10 +1,10 @@
 {
-  "name": "traceback-collector",
+  "name": "errors-everywhere-collector",
   "version": "1.0.0",
   "private": true,
-  "description": "Errors Everywhere collector CLI: runs tests, reads git/env/deps, sends an event to the TraceBack server.",
+  "description": "Errors Everywhere collector CLI: runs tests, reads git/env/deps, sends an event to the Errors Everywhere server.",
   "bin": {
-    "traceback": "bin/traceback.js"
+    "errors-everywhere": "bin/errors-everywhere.js"
   },
   "engines": {
     "node": ">=20"

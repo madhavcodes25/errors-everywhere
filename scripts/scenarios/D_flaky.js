@@ -1,6 +1,6 @@
 // Scenario D — flaky test: add a "refund works" test that fails ~30% of the
 // time at random (simulating an intermittent third-party refund API).
-// The failure message matches the seeded flaky history, so TraceBack can
+// The failure message matches the seeded flaky history, so Errors Everywhere can
 // show "passes and fails on the SAME commit".
 
 const fs = require("fs");

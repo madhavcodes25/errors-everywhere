@@ -1,4 +1,4 @@
-// Collector state, kept in <project>/.traceback/:
+// Collector state, kept in <project>/.errors-everywhere/:
 //   state.json       - lastRunSha (for the git range), ciRunId counter,
 //                      lastServer (so `resend` knows where to send)
 //   last-event.json  - the exact event that was sent last (for `resend`)
@@ -6,7 +6,7 @@
 const fs = require("fs");
 const path = require("path");
 
-const STATE_DIR = ".traceback";
+const STATE_DIR = ".errors-everywhere";
 
 function statePath(cwd) {
   return path.join(cwd, STATE_DIR, "state.json");
@@ -41,7 +41,7 @@ function saveState(cwd, { lastRunSha, ciRunId, lastServer }) {
   );
 }
 
-// Save the exact event we are about to send, so `traceback resend` can send
+// Save the exact event we are about to send, so `errors-everywhere resend` can send
 // the byte-identical event again (this is how duplicate protection is demoed).
 function saveLastEvent(cwd, event) {
   fs.mkdirSync(path.join(cwd, STATE_DIR), { recursive: true });

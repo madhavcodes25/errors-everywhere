@@ -2,7 +2,7 @@
   "name": "shop-api",
   "version": "1.0.0",
   "private": true,
-  "description": "Sample project TraceBack monitors. Pure modules + Jest tests we can break on purpose.",
+  "description": "Sample project Errors Everywhere monitors. Pure modules + Jest tests we can break on purpose.",
   "scripts": {
     "test": "jest"
   },

@@ -1,6 +1,6 @@
 // Error signatures + secret redaction for the collector.
 //
-// The signature algorithm is part of the TraceBack contract:
+// The signature algorithm is part of the Errors Everywhere contract:
 //   lowercase · quoted strings -> S · hex strings and UUIDs -> H ·
 //   file paths -> PATH · numbers -> N · collapse whitespace · sha1
 // Two failures with the same root cause produce the same signature, even

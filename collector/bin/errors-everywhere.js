@@ -1,26 +1,26 @@
 #!/usr/bin/env node
-// TraceBack collector CLI (zero dependencies, Node 20+).
+// Errors Everywhere collector CLI (zero dependencies, Node 20+).
 //
-//   traceback run    --project shop-api [--server http://localhost:4000] [--cwd <dir>]
-//   traceback resend [--server http://localhost:4000] [--cwd <dir>]
+//   errors-everywhere run    --project shop-api [--server http://localhost:4000] [--cwd <dir>]
+//   errors-everywhere resend [--server http://localhost:4000] [--cwd <dir>]
 //
 // Run it from inside the project it should record (or pass --cwd).
-// With `npm link` inside collector/ the `traceback` command is global;
-// otherwise: node collector/bin/traceback.js run ...
+// With `npm link` inside collector/ the `errors-everywhere` command is global;
+// otherwise: node collector/bin/errors-everywhere.js run ...
 
 const { runCollector, resendLastEvent } = require("../src/collector");
 
 const HELP = `
-TraceBack collector — records a test run for the TraceBack flight recorder.
+Errors Everywhere collector — records a test run for the Errors Everywhere flight recorder.
 
 Commands:
   run     Run jest, read git/env/deps, send a run.completed event
-  resend  Re-send the exact last event (.traceback/last-event.json) —
+  resend  Re-send the exact last event (.errors-everywhere/last-event.json) —
           demonstrates duplicate protection
 
 Options:
   --project <id>   Project identifier (required for "run")
-  --server <url>   TraceBack server base URL (default: http://localhost:4000)
+  --server <url>   Errors Everywhere server base URL (default: http://localhost:4000)
   --cwd <dir>      Target project directory (default: current directory)
   --help           Show this help
 `;
@@ -54,7 +54,7 @@ async function main() {
 
   if (command === "run") {
     if (!args.project || typeof args.project !== "string") {
-      console.error('[traceback] missing --project (e.g. traceback run --project shop-api)');
+      console.error('[errors-everywhere] missing --project (e.g. errors-everywhere run --project shop-api)');
       process.exit(1);
     }
     const code = await runCollector({ projectId: args.project, serverUrl, cwd });
@@ -66,11 +66,11 @@ async function main() {
     process.exit(code);
   }
 
-  console.error(`[traceback] unknown command: ${command}\n${HELP}`);
+  console.error(`[errors-everywhere] unknown command: ${command}\n${HELP}`);
   process.exit(1);
 }
 
 main().catch((err) => {
-  console.error("[traceback] unexpected collector crash:", err);
+  console.error("[errors-everywhere] unexpected collector crash:", err);
   process.exit(1);
 });

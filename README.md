@@ -4,132 +4,193 @@ Every CI run dies with the same four questions. Errors Everywhere answers them
 instantly, from history already stored in MongoDB — with evidence and an
 honest confidence label.
 
-1. **Why did this build/test fail?** — per-test verdicts (new regression /
-   flaky / environment problem / long-standing break) from 30 runs of history.
-2. **What changed since it last worked?** — side-by-side diff against the last
-   good run: commits, files, dependency bumps (majors flagged), env keys.
-3. **Which commit most likely broke it?** — Culprit Ranking: a LIFT score over
-   history plus a path-match fallback, every percentage backed by past run IDs.
-4. **Is it safe to release today?** — a points-based score with reasons, and a
-   blocked flag.
+| Question | Answer |
+| --- | --- |
+| **Why did this build/test fail?** | Per-test verdicts (new regression / flaky / environment problem / long-standing break) from 30 runs of history. |
+| **What changed since it last worked?** | Side-by-side diff vs. the last good run: commits, files, dependency bumps (majors flagged), env keys. |
+| **Which commit most likely broke it?** | Culprit Ranking: a LIFT score over history plus a path-match fallback, every percentage backed by past run IDs. |
+| **Is it safe to release today?** | Points-based release score with reasons and a `blocked` flag. |
 
 Rules and MongoDB do the detective work. The optional LLM only rephrases
-verified evidence — and every number it writes is checked against the facts.
+verified evidence — every number it writes is checked against the facts, so
+**honest beats fluent**.
+
+---
+
+## Quick start
+
+```bash
+# 1. Clone & enter
+git clone <this repo> && cd errors-everywhere
+
+# 2. Install the API server
+cd server && npm install
+
+# 3. Configure
+cp .env.example .env          # set MONGODB_URI for Atlas, or leave empty for the in-memory dev DB
+
+# 4. Initialize the database (idempotent — safe to rerun)
+npm run db:setup
+
+# 5. Start the API (http://localhost:4000)
+npm start
+```
+
+In a second terminal:
+
+```bash
+# 6. Start the dashboard (http://localhost:5173)
+cd ../dashboard && npm install && npm run dev
+
+# 7. Rebuild the demo git repo inside sample-project/ (idempotent)
+cd .. && npm run setup:sample
+
+# 8. Replay 30 days of seeded history into the running server
+npm run demo:seed
+```
+
+Now open the dashboard at `http://localhost:5173` and click **Load sample data**
+to see the timeline, verdicts, culprit ranking, and release check populated.
+
+---
+
+## Recording a run (the CLI)
+
+The collector is a zero-dependency CLI. Install it globally from `collector/`:
+
+```bash
+cd collector && npm link
+# now `errors-everywhere` is on your PATH
+```
+
+Run it from inside a project (or pass `--cwd`):
+
+```bash
+errors-everywhere run --project shop-api \
+  --server http://localhost:4000 \
+  --cwd /path/to/my-project
+```
+
+What it does:
+
+1. Runs `jest --json` (test failures are normal — they become a `failed` run;
+   only "no JSON at all" is a collector crash → `errored`)
+2. Reads git (commit, branch, author, commits/files since the last run)
+3. Reads declared dependencies and environment variable **names** (never values)
+4. Computes `eventId = sha1(projectId:commitSha:ciRunId:attempt)` and POSTs to
+   `POST /events`
+5. Saves the event to `.errors-everywhere/last-event.json` so
+   `errors-everywhere resend` can repeat it verbatim
+
+Idempotency: sending the same `eventId` twice stores it once
+(`duplicate_ignored`).
+
+---
+
+## The API
+
+| Question | Endpoint | Example response |
+| --- | --- | --- |
+| Why did it fail? | `GET /runs/:id/diagnosis` | `{ verdict: "new_regression", confidence: "high", evidence: [...] }` |
+| What changed? | `GET /runs/:id/changes?against=<runId>` | `{ commits: [...], changedFiles: [...], dependencies: {added,removed,changed}, ... }` |
+| Which commit? | `GET /runs/:id/culprits` | `{ candidates: [{ rank, sha, message, matchPercent: 74, reasons: [...] }] }` |
+| Safe to release? | `GET /projects/:id/release-check?runId=<runId>` | `{ score: 90, level: "HIGH", blocked: true, reasons: [...] }` |
+
+Other endpoints:
+
+- `POST /events` — idempotent ingestion (the collector's only write)
+- `GET /projects/:id/runs` — a project's run history
+- `GET /stream` — SSE feed of new/changed runs (drives the live dashboard)
+- `POST /runs/:id/summary` — optional LLM plain-English summary (falls back to a template)
+- `GET /health` — server health
+- `GET /rejected-events` — events the server refused, with reasons (never silently dropped)
+
+---
 
 ## Architecture
 
-```
+```text
  sample-project (shop-api)          collector (CLI)                MongoDB
  ┌──────────────────────┐   ┌──────────────────────────┐   ┌──────────────────┐
- │ src/*.js + Jest tests│──▶│ runs jest --json         │──▶│ events   (raw,   │
- │ git repo + scenarios │   │ reads git / deps / env   │   │ runs     (normal)│
- └──────────────────────┘   │ eventId = sha1(project:  │   │ rejected_events  │
-        demo scenarios      │   commit:ciRunId:attempt)│   │ projects         │
-        (break on purpose)  │ POST /events (idempotent)│   └──────┬───────────┘
-                            └──────────────────────────┘          │
-                                                                  ▼
- dashboard (React+Vite) ◀── SSE /stream ◀── server (Express) ── analysis
- timeline, diagnosis,      (change streams,  engine: diagnosis / changes /
- culprits, changes,        heartbeat, restart)        culprits / release / summary
- release check             GET /rejected-events, /health
+ │ src/*.js + Jest tests│──▶│ runs jest --json         │──▶│ events   (raw    │
+ │ git repo             │   │ reads git / deps / env   │   │  audit trail)    │
+ └──────────────────────┘   │ eventId = sha1(project:  │   │ runs (normalized │
+         demo scenarios     │   commit:ciRunId:attempt)│   │  for analysis)   │
+         (break on purpose) │ POST /events (idempotent)│   │ rejected_events  │
+                            └──────────────────────────┘   │ projects         │
+                                                           └──────┬───────────┘
+                                                                 ▼
+                      dashboard (React+Vite) ◀── SSE /stream ◀── server (Express)
+                      timeline, diagnosis,   (change streams,    analysis engine:
+                      culprits, changes,      heartbeat, restart) diagnosis /
+                      release check           GET /rejected-events  changes /
+                                                /health               culprits /
+                                                releases / summary
 ```
 
-## The four answers, as endpoints
+---
 
-| Question | Endpoint |
-| --- | --- |
-| Why did it fail? | `GET /runs/:id/diagnosis` |
-| What changed? | `GET /runs/:id/changes?against=<runId>` (default: last good run) |
-| Which commit? | `GET /runs/:id/culprits` |
-| Safe to release? | `GET /projects/:id/release-check?runId=<runId>` |
+## The data contract
 
-Plus the API contract: `POST /events` (idempotent), `GET /projects/:id/runs`,
-`GET /stream` (SSE), `POST /runs/:id/summary` (optional LLM), `GET /health`,
-and `GET /rejected-events` (what the server refused, re-redacted).
-
-## Setup (under 10 steps)
-
-1. Node 20+, a MongoDB **Atlas free tier** (a replica set — change streams
-   need one). No Atlas? The server falls back to a local in-memory replica
-   set for development (data is lost on restart).
-2. `git clone <this repo> && cd traceback`
-3. `cd server && npm install`
-4. `cp .env.example .env` and set `MONGODB_URI` (Atlas connection string).
-   Leave it empty for the in-memory fallback.
-5. `npm run db:setup` — creates the collections with `$jsonSchema`
-   validators + all indexes. Idempotent; safe to run any time.
-6. `npm start` — the API on `http://localhost:4000`
-7. `cd ../dashboard && npm install && npm run dev` — the UI on
-   `http://localhost:5173`
-8. `cd .. && npm run setup:sample` — rebuilds the demo git repo inside
-   `sample-project/` (its `.git` ships outside the repo on purpose). Idempotent.
-9. Optional, sample project: `cd sample-project && npm install` (Jest + deps
-   for the demo scenarios and the collector).
-10. Follow `scripts/demo.md` for the 5-minute demo (`npm run demo:…`).
-11. `cd .. && npm run demo:seed` — replays 30 days of realistic history into
-    the running server (also works against Atlas).
-
-## The data contract (short version)
-
-- **events** (raw audit trail): `{ eventId, projectId, type, timestamp,
-  receivedAt, payload }` — `eventId = sha1(projectId:commitSha:ciRunId:attempt)`;
-  re-sending an event is a no-op (`$setOnInsert` upsert + unique index).
-- **runs** (normalized, what analysis reads): `{ _id: "run_"+eventId.slice(0,12),
-  eventId, projectId, commitSha, branch, author, startedAt, finishedAt,
-  durationMs, status: passed|failed|errored, commits[], changedFiles[],
-  dependencies[] (array — dots in `@scope/pkg` would break as field names),
-  envKeys[] (NAMES only, never values), missingEnvKeys[], tests[]
-  ({name, file, status, durationMs, error{message, signature}}),
-  collectorError?, summary? }`
-- **rejected_events**: what the server refused, with the exact reason
-  (re-redacted on display).
+- **events** (raw audit trail): `{ eventId, projectId, type, timestamp, receivedAt, payload }` — `eventId = sha1(projectId:commitSha:ciRunId:attempt)`; re-sending is a no-op (`$setOnInsert` upsert + unique index).
+- **runs** (normalized, what analysis reads): `{ _id: "run_" + eventId.slice(0,12), eventId, projectId, commitSha, branch, author, startedAt, finishedAt, durationMs, status: passed\|failed\|errored, commits[], changedFiles[], dependencies[] (array — dots in `@scope/pkg` would break as field names), envKeys[] (NAMES only, never values), missingEnvKeys[], tests[] ({name, file, status, durationMs, error{message, signature}}), collectorError?, summary? }`
+- **rejected_events**: what the server refused, with the exact reason (re-redacted on display).
 - **projects**: `{ _id, name, requiredEnvKeys[] }`.
+
+Secrets: error messages are redacted before signing/storage — connection strings,
+tokens, `key=value` leaks, long hex blobs → `[REDACTED]`. Values are never stored.
+
+---
 
 ## How MongoDB is used
 
-- **Schema validation** — `$jsonSchema` on `events` and `runs` (created by the
-  idempotent `npm run db:setup`, applied on every server boot): even a buggy
-  writer cannot store a contract-breaking document (verified: error code 121).
-- **Indexes** — one per question: `{eventId:1}` unique (idempotency);
-  `{projectId, startedAt:-1}` (latest runs); `{projectId, status, startedAt:-1}`
-  (filtered lists + last-good-run); `{projectId, "tests.name":1}` (flaky
-  history); `{projectId, changedFiles:1}` (file correlation);
-  `{projectId, "tests.error.signature":1}` (recurring failures).
-  `explain()` shows the latest-runs query as `LIMIT → FETCH → IXSCAN`.
-- **Aggregation** — the analysis core: per-test history pipelines, the flaky
-  check (`$group` by test + commitSha), file fail-rates
-  (`$unwind changedFiles → $group`), and the culprit LIFT score (one
-  `$facet` for totals/test/file/co-occurrence stats).
-- **Change streams** — `GET /stream` pushes new/changed runs to the dashboard
-  live (replica sets only; the server falls back to polling and tells you to
-  use Atlas otherwise).
-- **Idempotent ingestion** — `$setOnInsert` + upsert + unique index: the same
-  event sent twice is stored once; the run upsert also repairs a crash
-  between the two stores.
+- **Schema validation** — `$jsonSchema` on `events` and `runs` (created by the idempotent `npm run db:setup`, applied on every server boot): even a buggy writer cannot store a contract-breaking document (verified: error code 121).
+- **Indexes** — one per question: `{eventId:1}` unique (idempotency); `{projectId, startedAt:-1}` (latest runs); `{projectId, status, startedAt:-1}` (filtered lists + last-good-run); `{projectId, "tests.name":1}` (flaky history); `{projectId, changedFiles:1}` (file correlation); `{projectId, "tests.error.signature":1}` (recurring failures). `explain()` shows the latest-runs query as `LIMIT → FETCH → IXSCAN`.
+- **Aggregation** — the analysis core: per-test history pipelines, the flaky check (`$group` by test + commitSha), file fail-rates (`$unwind changedFiles → $group`), and the culprit LIFT score (one `$facet` for totals/test/file/co-occurrence stats).
+- **Change streams** — `GET /stream` pushes new/changed runs to the dashboard live (replica sets only; the server falls back to polling and tells you to use Atlas otherwise).
+- **Idempotent ingestion** — `$setOnInsert` + upsert + unique index: the same event sent twice is stored once; the run upsert also repairs a crash between the two stores.
+
+---
 
 ## Limitations (honest)
 
-- **Confidence depends on history**: verdicts are `low` below 5 prior runs,
-  `high` above 15. Fresh projects get honest "unknown" answers, not guesses.
-- Culprit ranking ranks only the commits **between the last good run and the
-  failure** — it cannot see changes that were never recorded.
-- The flaky verdict needs the same commit to have both outcomes; a first-time
-  flake on a brand-new commit looks like a regression.
-- The safety-checked LLM summary is strict: any number/file/sha it writes that
-  is not in the evidence discards the whole LLM text (falls back to the
-  template). Honest beats fluent.
-- Single-branch thinking: history comparisons are project-scoped
-  (branch-scoped only in culprit baselines).
+- **Confidence depends on history**: verdicts are `low` below 5 prior runs, `high` above 15. Fresh projects get honest "unknown" answers, not guesses.
+- Culprit ranking ranks only the commits **between the last good run and the failure** — it cannot see changes that were never recorded.
+- The flaky verdict needs the same commit to have both outcomes; a first-time flake on a brand-new commit looks like a regression.
+- The safety-checked LLM summary is strict: any number/file/sha it writes that is not in the evidence discards the whole LLM text (falls back to the template). Honest beats fluent.
+- Single-branch thinking: history comparisons are project-scoped (branch-scoped only in culprit baselines).
 - The in-memory fallback is for development only — data dies with the process.
 
-## Future work
+---
 
-- A **GitHub Action**: run the collector on every push and PR.
-- A **CLI release gate**: `release-gate --project shop-api` exits non-zero
-  when the release check says HIGH/BLOCKED — wire it between CI and deploy.
-- Branch-aware baselines everywhere, and culprit ranking that learns lift
-  per test×file pair over longer windows.
-- Slack/Teams notifications on new HIGH release risks.
+## Demo (5 minutes)
+
+See `scripts/demo.md` for the full rehearsal, or run the highlights:
+
+```bash
+# green run, appears live in the timeline (SSE)
+npm run demo:healthy
+
+# commit bundle where ONE run covers 3 commits — Culprit Ranking isolates the real culprit
+npm run demo:culprit
+
+# same event twice → stored ONCE (idempotency)
+npm run demo:duplicate
+
+# no projectId → 400, stored in rejected_events
+npm run demo:bad-event
+
+# jest cannot start → grey "errored" run with collectorError
+npm run demo:collector-crash
+
+# missing STRIPE_KEY → environment_problem, release risk +20
+npm run demo:invalid-config
+
+# clean, seeded state for the next rehearsal
+npm run demo:reset
+```
+
+---
 
 ## Repo layout
 
@@ -141,5 +202,11 @@ dashboard/        React + Vite: timeline, run detail, culprits, release check
 scripts/          seeder, demo scenarios, demo.md, one-command demo scripts
 ```
 
-Run the tests: `server: npm test` (unit) · `npm run test:api` ·
-`npm run test:analysis` · `sample-project: npm test`.
+---
+
+## Tests
+
+- `server: npm test` — unit tests (13 passing)
+- `server: npm run test:api` — API contract checks
+- `server: npm run test:analysis` — diagnosis / changes / culprits / release-check acceptance checks against seeded data
+- `sample-project: npm test` — the demo suite itself

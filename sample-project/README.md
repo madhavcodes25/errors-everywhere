@@ -1,8 +1,8 @@
-# shop-api (sample project for TraceBack)
+# shop-api (sample project for Errors Everywhere)
 
-A tiny e-commerce API core used as the sample project for **TraceBack**, the
+A tiny e-commerce API core used as the sample project for **Errors Everywhere**, the
 flight recorder for builds. It is intentionally small — pure modules plus
-Jest tests — so demo scenarios can break things on purpose and TraceBack can
+Jest tests — so demo scenarios can break things on purpose and Errors Everywhere can
 explain what happened.
 
 ## Modules
@@ -22,5 +22,5 @@ npm test
 
 ## Environment variables
 
-`DATABASE_URL` and `STRIPE_KEY` are required. TraceBack records only their
+`DATABASE_URL` and `STRIPE_KEY` are required. Errors Everywhere records only their
 names, never their values.

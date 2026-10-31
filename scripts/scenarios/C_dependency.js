@@ -1,6 +1,6 @@
 // Scenario C — dependency upgrade: bump express to a new MAJOR version and
 // let a sloppy migration slip into src/discount.js (>= becomes >), so the
-// tier-discount test fails. TraceBack should show the dependency diff and
+// tier-discount test fails. Errors Everywhere should show the dependency diff and
 // rank the bump commit as the culprit.
 
 const {

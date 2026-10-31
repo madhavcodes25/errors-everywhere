@@ -35,7 +35,7 @@ function run() {
     git(["init", "-b", "main"]);
     try {
       git(["config", "user.name", "Demo Developer"]);
-      git(["config", "user.email", "demo@traceback.dev"]);
+      git(["config", "user.email", "demo@errors-everywhere.dev"]);
       git(["config", "core.autocrlf", "false"]);
     } catch {
       /* global config exists — fine */

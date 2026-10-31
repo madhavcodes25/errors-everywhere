@@ -1,6 +1,6 @@
 // npm run demo:invalid-config — scenario E: STRIPE_KEY removed from the
 // environment. The config test fails, the collector reports the missing env
-// var, TraceBack diagnoses environment_problem and the release risk jumps.
+// var, Errors Everywhere diagnoses environment_problem and the release risk jumps.
 // The sample project is reset afterwards — ALWAYS, before the process exits
 // (a process.exit inside the try would skip it).
 

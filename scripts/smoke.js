@@ -1,11 +1,11 @@
-// Smoke check for the TraceBack server — verifies the core contract end to end:
+// Smoke check for the Errors Everywhere server — verifies the core contract end to end:
 //   ingest -> idempotency -> rejection of bad input -> redaction ->
 //   diagnosis -> changes -> culprits -> release-check
 //
 // Usage:
 //   1. start the server:   cd server && npm start
 //   2. run this script:    node ../scripts/smoke.js          (from server/)
-//                          node scripts/smoke.js             (from traceback/)
+//                          node scripts/smoke.js             (from errors-everywhere/)
 // Optional: BASE=http://localhost:4000 node scripts/smoke.js
 
 const BASE = process.env.BASE || "http://localhost:4000";
