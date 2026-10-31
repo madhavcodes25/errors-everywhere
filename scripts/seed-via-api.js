@@ -17,7 +17,10 @@ function arg(name, fallback) {
   return i !== -1 && process.argv[i + 1] ? process.argv[i + 1] : fallback;
 }
 
-const BASE = arg("server", "http://localhost:4000").replace(/\/$/, "");
+const BASE = arg(
+  "server",
+  process.env.SERVER_URL || process.env.ERRORS_EVERYWHERE_SERVER || "http://localhost:4000"
+).replace(/\/$/, "");
 const PROJECT_ID = arg("project", "shop-api");
 
 // Convert a seeded run document into a contract-valid event payload.

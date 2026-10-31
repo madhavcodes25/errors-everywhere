@@ -15,6 +15,9 @@ Rules and MongoDB do the detective work. The optional LLM only rephrases
 verified evidence — every number it writes is checked against the facts, so
 **honest beats fluent**.
 
+> 🚀 **Live Dashboard:** [https://errors-everywhere-dashboard.onrender.com](https://errors-everywhere-dashboard.onrender.com)  
+> 📡 **Live API:** [https://errors-everywhere-api.onrender.com/health](https://errors-everywhere-api.onrender.com/health)
+
 ---
 
 ## Quick start

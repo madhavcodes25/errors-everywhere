@@ -11,7 +11,12 @@ const COLLECTOR = path.join(ROOT, "collector", "bin", "errors-everywhere.js");
 
 function serverUrl() {
   const i = process.argv.indexOf("--server");
-  return (i !== -1 && process.argv[i + 1]) || "http://localhost:4000";
+  return (
+    (i !== -1 && process.argv[i + 1]) ||
+    process.env.SERVER_URL ||
+    process.env.ERRORS_EVERYWHERE_SERVER ||
+    "http://localhost:4000"
+  );
 }
 
 async function post(path, body) {
