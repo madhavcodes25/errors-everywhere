@@ -63,6 +63,11 @@ and `GET /rejected-events` (Part 8 addition — what the server refused, re-reda
 6. `npm start` — the API on `http://localhost:4000`
 7. `cd ../dashboard && npm install && npm run dev` — the UI on
    `http://localhost:5173`
+8. `cd .. && npm run setup:sample` — rebuilds the demo git repo inside
+   `sample-project/` (its `.git` ships outside the repo on purpose). Idempotent.
+9. Optional, sample project: `cd sample-project && npm install` (Jest + deps
+   for the demo scenarios and the collector).
+10. Follow `scripts/demo.md` for the 5-minute demo (`npm run demo:…`).
 8. `cd .. && npm run demo:seed` — replays 30 days of realistic history into
    the running server (also works against Atlas).
 9. Optional, sample project: `cd sample-project && npm install` (Jest + deps
