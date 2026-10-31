@@ -19,42 +19,50 @@ verified evidence — every number it writes is checked against the facts, so
 
 ## Quick start
 
+> **Prerequisites:** Node.js ≥ 20, npm, Git. No Docker or external database required — the server starts an in-memory replica set automatically when `MONGODB_URI` is blank.
+
 ```bash
 # 1. Clone & enter
-git clone <this repo> && cd errors-everywhere
+git clone <this-repo-url> && cd errors-everywhere
 
 # 2. Install the API server
 cd server && npm install
 
-# 3. Configure
-cp .env.example .env          # set MONGODB_URI for Atlas, or leave empty for the in-memory dev DB
+# 3. Configure (leave MONGODB_URI empty for the built-in in-memory dev DB)
+cp .env.example .env
 
 # 4. Initialize the database (idempotent — safe to rerun)
 npm run db:setup
 
-# 5. Start the API (http://localhost:4000)
+# 5. Start the API  →  http://localhost:4000
 npm start
 ```
 
 In a second terminal:
 
 ```bash
-# 6. Start the dashboard (http://localhost:5173)
-cd ../dashboard && npm install && npm run dev
+# 6. Install and start the dashboard  →  http://localhost:5173
+cd dashboard && npm install && npm run dev
+```
 
-# 7. Rebuild the demo git repo inside sample-project/ (idempotent)
-cd .. && npm run setup:sample
+In a third terminal (from the repo root):
+
+```bash
+# 7. Build the demo git repo inside sample-project/ (one-time, idempotent)
+npm run setup:sample
 
 # 8. Replay 30 days of seeded history into the running server
 npm run demo:seed
 ```
 
-Now open the dashboard at `http://localhost:5173` and click **Load sample data**
-to see the timeline, verdicts, culprit ranking, and release check populated.
+Open the dashboard at `http://localhost:5173`. If this is your first visit you will see the
+Welcome screen — click **Load sample data** to instantly see the timeline,
+verdicts, culprit ranking, and release check populated with the built-in mock
+data, or close the welcome panel to connect to the live seeded data.
 
 ---
 
-## Recording a run (the CLI)
+## Recording a real run (the CLI)
 
 The collector is a zero-dependency CLI. Install it globally from `collector/`:
 
@@ -63,7 +71,7 @@ cd collector && npm link
 # now `errors-everywhere` is on your PATH
 ```
 
-Run it from inside a project (or pass `--cwd`):
+Run it from inside any project (or pass `--cwd`):
 
 ```bash
 errors-everywhere run --project shop-api \
@@ -109,7 +117,7 @@ Other endpoints:
 
 ## Architecture
 
-```text
+```
  sample-project (shop-api)          collector (CLI)                MongoDB
  ┌──────────────────────┐   ┌──────────────────────────┐   ┌──────────────────┐
  │ src/*.js + Jest tests│──▶│ runs jest --json         │──▶│ events   (raw    │
@@ -124,8 +132,8 @@ Other endpoints:
                       timeline, diagnosis,   (change streams,    analysis engine:
                       culprits, changes,      heartbeat, restart) diagnosis /
                       release check           GET /rejected-events  changes /
-                                                /health               culprits /
-                                                releases / summary
+                                               /health               culprits /
+                                                                      summary
 ```
 
 ---
@@ -133,7 +141,7 @@ Other endpoints:
 ## The data contract
 
 - **events** (raw audit trail): `{ eventId, projectId, type, timestamp, receivedAt, payload }` — `eventId = sha1(projectId:commitSha:ciRunId:attempt)`; re-sending is a no-op (`$setOnInsert` upsert + unique index).
-- **runs** (normalized, what analysis reads): `{ _id: "run_" + eventId.slice(0,12), eventId, projectId, commitSha, branch, author, startedAt, finishedAt, durationMs, status: passed\|failed\|errored, commits[], changedFiles[], dependencies[] (array — dots in `@scope/pkg` would break as field names), envKeys[] (NAMES only, never values), missingEnvKeys[], tests[] ({name, file, status, durationMs, error{message, signature}}), collectorError?, summary? }`
+- **runs** (normalized, what analysis reads): `{ _id: "run_" + eventId.slice(0,12), eventId, projectId, commitSha, branch, author, startedAt, finishedAt, durationMs, status: passed|failed|errored, commits[], changedFiles[], dependencies[] (array — dots in @scope/pkg would break as field names), envKeys[] (NAMES only, never values), missingEnvKeys[], tests[] ({name, file, status, durationMs, error{message, signature}}), collectorError?, summary? }`
 - **rejected_events**: what the server refused, with the exact reason (re-redacted on display).
 - **projects**: `{ _id, name, requiredEnvKeys[] }`.
 
@@ -152,43 +160,20 @@ tokens, `key=value` leaks, long hex blobs → `[REDACTED]`. Values are never sto
 
 ---
 
-## Limitations (honest)
+## Configuration
 
-- **Confidence depends on history**: verdicts are `low` below 5 prior runs, `high` above 15. Fresh projects get honest "unknown" answers, not guesses.
-- Culprit ranking ranks only the commits **between the last good run and the failure** — it cannot see changes that were never recorded.
-- The flaky verdict needs the same commit to have both outcomes; a first-time flake on a brand-new commit looks like a regression.
-- The safety-checked LLM summary is strict: any number/file/sha it writes that is not in the evidence discards the whole LLM text (falls back to the template). Honest beats fluent.
-- Single-branch thinking: history comparisons are project-scoped (branch-scoped only in culprit baselines).
-- The in-memory fallback is for development only — data dies with the process.
+The server reads `server/.env` on startup. Copy `server/.env.example` and fill in:
 
----
-
-## Demo (5 minutes)
-
-See `scripts/demo.md` for the full rehearsal, or run the highlights:
-
-```bash
-# green run, appears live in the timeline (SSE)
-npm run demo:healthy
-
-# commit bundle where ONE run covers 3 commits — Culprit Ranking isolates the real culprit
-npm run demo:culprit
-
-# same event twice → stored ONCE (idempotency)
-npm run demo:duplicate
-
-# no projectId → 400, stored in rejected_events
-npm run demo:bad-event
-
-# jest cannot start → grey "errored" run with collectorError
-npm run demo:collector-crash
-
-# missing STRIPE_KEY → environment_problem, release risk +20
-npm run demo:invalid-config
-
-# clean, seeded state for the next rehearsal
-npm run demo:reset
-```
+| Variable | Default | Description |
+| --- | --- | --- |
+| `MONGODB_URI` | *(empty)* | Atlas connection string. Leave blank to use the built-in in-memory replica set (data lost on restart). |
+| `PORT` | `4000` | Port the Express API listens on. |
+| `DATABASE_NAME` | `errors-everywhere` | MongoDB database name. |
+| `LLM_ENABLED` | `false` | Set `true` to enable plain-English AI summaries. |
+| `MODEL_PROVIDER` | `openai` | `openai` or `anthropic` (any `/chat/completions`-compatible endpoint). |
+| `MODEL_NAME` | `gpt-4o-mini` | Model to use for summaries. |
+| `API_KEY` | *(empty)* | Key for the model provider. Never logged or stored. |
+| `MODEL_BASE_URL` | `https://api.openai.com/v1` | Override for Azure proxies, LM Studio, etc. |
 
 ---
 
@@ -199,7 +184,7 @@ sample-project/   shop-api + Jest tests + git repo + break-on-purpose scenarios
 collector/        CLI: run / resend (zero dependencies)
 server/           Express + mongodb driver: ingest, analysis, SSE, summary
 dashboard/        React + Vite: timeline, run detail, culprits, release check
-scripts/          seeder, demo scenarios, demo.md, one-command demo scripts
+scripts/          seeder, demo scenarios, one-command demo scripts
 ```
 
 ---
@@ -207,6 +192,17 @@ scripts/          seeder, demo scenarios, demo.md, one-command demo scripts
 ## Tests
 
 - `server: npm test` — unit tests (13 passing)
-- `server: npm run test:api` — API contract checks
+- `server: npm run test:api` — API contract checks against a live server
 - `server: npm run test:analysis` — diagnosis / changes / culprits / release-check acceptance checks against seeded data
 - `sample-project: npm test` — the demo suite itself
+
+---
+
+## Limitations (honest)
+
+- **Confidence depends on history**: verdicts are `low` below 5 prior runs, `high` above 15. Fresh projects get honest "unknown" answers, not guesses.
+- Culprit ranking ranks only the commits **between the last good run and the failure** — it cannot see changes that were never recorded.
+- The flaky verdict needs the same commit to have both outcomes; a first-time flake on a brand-new commit looks like a regression.
+- The safety-checked LLM summary is strict: any number/file/sha it writes that is not in the evidence discards the whole LLM text (falls back to the template). Honest beats fluent.
+- Single-branch thinking: history comparisons are project-scoped (branch-scoped only in culprit baselines).
+- The in-memory fallback is for development only — data dies with the process.
