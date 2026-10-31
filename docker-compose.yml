@@ -1,0 +1,26 @@
+services:
+  server:
+    build: ./server
+    ports:
+      - "4000:4000"
+    environment:
+      MONGODB_URI: ${MONGODB_URI}
+      PORT: 4000
+      DATABASE_NAME: errors-everywhere
+      LLM_ENABLED: ${LLM_ENABLED:-false}
+      MODEL_PROVIDER: ${MODEL_PROVIDER:-openai}
+      MODEL_NAME: ${MODEL_NAME:-gpt-4o-mini}
+      API_KEY: ${API_KEY:-}
+      MODEL_BASE_URL: ${MODEL_BASE_URL:-https://api.openai.com/v1}
+    restart: unless-stopped
+
+  dashboard:
+    build:
+      context: ./dashboard
+      args:
+        VITE_API_URL: ${VITE_API_URL:-http://localhost:4000}
+    ports:
+      - "5173:80"
+    depends_on:
+      - server
+    restart: unless-stopped

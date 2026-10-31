@@ -19,7 +19,7 @@ verified evidence — every number it writes is checked against the facts, so
 
 ## Quick start
 
-> **Prerequisites:** Node.js ≥ 20, npm, Git. No Docker or external database required — the server starts an in-memory replica set automatically when `MONGODB_URI` is blank.
+> **Prerequisites:** Node.js ≥ 20, npm, Git, and a **MongoDB Atlas** cluster (free M0 tier works). See [MongoDB Atlas setup](#mongodb-atlas-setup) below if you don't have one yet.
 
 ```bash
 # 1. Clone & enter
@@ -28,7 +28,7 @@ git clone <this-repo-url> && cd errors-everywhere
 # 2. Install the API server
 cd server && npm install
 
-# 3. Configure (leave MONGODB_URI empty for the built-in in-memory dev DB)
+# 3. Configure — paste your Atlas URI into MONGODB_URI
 cp .env.example .env
 
 # 4. Initialize the database (idempotent — safe to rerun)
@@ -59,6 +59,106 @@ Open the dashboard at `http://localhost:5173`. If this is your first visit you w
 Welcome screen — click **Load sample data** to instantly see the timeline,
 verdicts, culprit ranking, and release check populated with the built-in mock
 data, or close the welcome panel to connect to the live seeded data.
+
+---
+
+## MongoDB Atlas setup
+
+MongoDB Atlas is required. The free **M0** tier is enough for the full demo.
+
+1. Go to [cloud.mongodb.com](https://cloud.mongodb.com) → **Create a free account** (or sign in).
+2. Create a **Free (M0)** cluster — pick any region, leave the defaults.
+3. In **Security → Database Access** add a user with **Read and write to any database** privileges. Note the username and password.
+4. In **Security → Network Access** click **Add IP Address → Allow Access from Anywhere** (`0.0.0.0/0`) for the demo, or add your specific IP.
+5. In **Deployment → Database** click **Connect → Drivers** and copy the connection string. It looks like:
+   ```
+   mongodb+srv://<user>:<password>@cluster0.xxxxx.mongodb.net/?retryWrites=true&w=majority
+   ```
+6. Paste it into `server/.env`:
+   ```
+   MONGODB_URI=mongodb+srv://<user>:<password>@cluster0.xxxxx.mongodb.net/errors-everywhere?retryWrites=true&w=majority
+   ```
+
+> **Why Atlas?** Change streams (which power the live SSE dashboard) require a **replica set**. Atlas M0 is always a replica set. A standalone `mongod` falls back to 3-second polling automatically, but Atlas gives you true real-time updates.
+
+---
+
+## Deployment
+
+The project ships a `Dockerfile` for each component and a `docker-compose.yml` at the root so the whole stack can be brought up with one command.
+
+### Option A — Docker Compose (simplest, self-contained)
+
+```bash
+# From the repo root — set your Atlas URI first
+export MONGODB_URI="mongodb+srv://user:pass@cluster0.xxxxx.mongodb.net/errors-everywhere?retryWrites=true&w=majority"
+
+docker compose up --build
+```
+
+| Service | URL |
+| --- | --- |
+| API server | http://localhost:4000 |
+| Dashboard | http://localhost:5173 |
+
+To pass a custom dashboard → API URL (e.g. for cloud deployment):
+
+```bash
+MONGODB_URI="..." VITE_API_URL="https://your-api.example.com" docker compose up --build
+```
+
+> **Note:** The dashboard Dockerfile bakes `VITE_API_URL` at build time (Vite env vars are inlined). Rebuild the image after changing it.
+
+---
+
+### Option B — Render (free tier, no Docker needed)
+
+**1. Deploy the API server**
+
+- New → **Web Service** → connect your repo → set **Root Directory** to `server`
+- Runtime: **Node**, Build command: `npm install`, Start command: `npm start`
+- Environment variables:
+
+| Key | Value |
+| --- | --- |
+| `MONGODB_URI` | your Atlas connection string |
+| `PORT` | `10000` (Render injects this automatically) |
+| `DATABASE_NAME` | `errors-everywhere` |
+
+- Copy the deployed URL (e.g. `https://errors-everywhere-api.onrender.com`).
+
+**2. Deploy the dashboard**
+
+- New → **Static Site** → same repo → **Root Directory**: `dashboard`
+- Build command: `npm install && npm run build`
+- Publish directory: `dist`
+- Environment variable: `VITE_API_URL` = the API URL from step 1
+
+---
+
+### Option C — Railway
+
+Install the [Railway CLI](https://docs.railway.app/develop/cli) then:
+
+```bash
+railway login
+railway init          # creates a new project
+
+# Deploy the server
+cd server
+railway up --service api
+
+# Set env vars on the api service
+railway variables set MONGODB_URI="mongodb+srv://..."
+railway variables set DATABASE_NAME="errors-everywhere"
+
+# Deploy the dashboard
+cd ../dashboard
+railway up --service dashboard
+railway variables set VITE_API_URL="https://api.up.railway.app"
+```
+
+> After setting `VITE_API_URL`, trigger a redeploy of the dashboard service so the variable is baked into the Vite build.
 
 ---
 
@@ -166,7 +266,7 @@ The server reads `server/.env` on startup. Copy `server/.env.example` and fill i
 
 | Variable | Default | Description |
 | --- | --- | --- |
-| `MONGODB_URI` | *(empty)* | Atlas connection string. Leave blank to use the built-in in-memory replica set (data lost on restart). |
+| `MONGODB_URI` | *(required)* | Atlas connection string (`mongodb+srv://...`). See [MongoDB Atlas setup](#mongodb-atlas-setup). |
 | `PORT` | `4000` | Port the Express API listens on. |
 | `DATABASE_NAME` | `errors-everywhere` | MongoDB database name. |
 | `LLM_ENABLED` | `false` | Set `true` to enable plain-English AI summaries. |
