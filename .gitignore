@@ -1,0 +1,25 @@
+# --- dependencies ---
+node_modules/
+
+# --- builds ---
+dist/
+coverage/
+
+# --- secrets / env (never commit) ---
+.env
+.env.local
+server/.env
+sample-project/.env
+
+# --- runtime state ---
+.traceback/
+*.log
+tmp/
+
+# --- sample-project keeps its own LOCAL demo git repo (rebuild with
+#     npm run setup:sample on fresh clones) — never push the inner .git ---
+sample-project/.git/
+
+# --- OS junk ---
+Thumbs.db
+.DS_Store

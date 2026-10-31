@@ -1,0 +1,79 @@
+/* Design tokens — "Error Everywhere": dark-first, techy, type-led.
+   Colour carries meaning only (safe/caution/block/grey). */
+
+:root {
+  color-scheme: dark;
+
+  /* surfaces + ink */
+  --bg: #05070d;
+  --surface: #0a0f1a;
+  --surface-2: #0f1626;
+  --hairline: rgba(120, 160, 255, 0.14);
+  --text: #e6ecff;
+  --muted: #8793b0;
+  --faint: #6b7694;
+
+  /* status — meaning only, each with a 12% tint */
+  --safe: #34f5a1;
+  --safe-bg: rgba(52, 245, 161, 0.12);
+  --caution: #ffc24d;
+  --caution-bg: rgba(255, 194, 77, 0.12);
+  --block: #ff4d6a;
+  --block-bg: rgba(255, 77, 106, 0.12);
+  --errored: #8793b0;
+  --errored-bg: rgba(135, 147, 176, 0.12);
+
+  /* accents — focus, links, active items, key highlights */
+  --accent: #22d3ee;
+  --accent-2: #4f8cff;
+  --accent-glow: rgba(34, 211, 238, 0.35);
+  --accent-line: rgba(34, 211, 238, 0.55);
+
+  /* type */
+  --font-display: "Chakra Petch", "Space Grotesk", system-ui, sans-serif;
+  --font-ui: "Space Grotesk", "Inter", -apple-system, "Segoe UI", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+
+  --fs-12: 0.75rem;   /* 12 */
+  --fs-13: 0.8125rem; /* 13 */
+  --fs-14: 0.875rem;  /* 14 — body minimum */
+  --fs-16: 1rem;      /* 16 */
+  --fs-20: 1.25rem;   /* 20 */
+  --fs-28: 1.75rem;   /* 28 */
+  --fs-44: 2.75rem;   /* 44 */
+  --fs-72: 4.5rem;    /* 72 — the verdict word */
+
+  --track-label: 0.1em;
+  --track-display: 0.04em;
+
+  --lh-body: 1.55;
+  --lh-tight: 1.08;
+
+  --max-text: 68ch;
+  --sidebar-w: 224px;
+  --radius: 5px;
+  --speed: 180ms;
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
+  --bg: #f3f5fc;
+  --surface: #ffffff;
+  --surface-2: #eef1f9;
+  --hairline: rgba(80, 110, 200, 0.16);
+  --text: #131a2a;
+  --muted: #5b6780;
+  --faint: #8793b0;
+  --safe: #0f8a4d;
+  --safe-bg: rgba(15, 138, 77, 0.1);
+  --caution: #a16207;
+  --caution-bg: rgba(161, 98, 7, 0.1);
+  --block: #be123c;
+  --block-bg: rgba(190, 18, 60, 0.08);
+  --errored: #5b6780;
+  --errored-bg: rgba(91, 103, 128, 0.1);
+  --accent: #0e7490;
+  --accent-2: #345ccb;
+  --accent-glow: rgba(14, 116, 144, 0.3);
+  --accent-line: rgba(14, 116, 144, 0.5);
+}

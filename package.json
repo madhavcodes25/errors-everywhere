@@ -1,0 +1,17 @@
+{
+  "name": "traceback",
+  "version": "1.0.0",
+  "private": true,
+  "description": "TraceBack — a flight recorder for builds. Root helper scripts for the hackathon demo.",
+  "scripts": {
+    "demo:seed": "node scripts/seed-via-api.js",
+    "demo:reset": "node scripts/demo/reset.js",
+    "demo:healthy": "node scripts/demo/healthy.js",
+    "demo:culprit": "node scripts/demo/culprit.js",
+    "demo:duplicate": "node scripts/demo/duplicate.js",
+    "demo:bad-event": "node scripts/demo/bad-event.js",
+    "demo:collector-crash": "node scripts/demo/collector-crash.js",
+    "demo:invalid-config": "node scripts/demo/invalid-config.js",
+    "setup:sample": "node scripts/setup-sample-repo.js"
+  }
+}
